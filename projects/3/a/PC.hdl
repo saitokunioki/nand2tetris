@@ -14,5 +14,28 @@ CHIP PC {
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+    ////まず inc するかどうか
+    Inc16(
+        in=pcOut, out=pcPlusOne
+    );
+    Mux16(
+        a=pcOut, b=pcPlusOne, sel=inc, out=afterInc
+    );
+
+    ////次に load するかどうか
+    Mux16(
+        a=afterInc, b=in, sel=load, out=afterLoad
+    );
+
+    ////最後に reset するかどうか
+    Mux16(
+        a=afterLoad, b=false, sel=reset, out=nextPC
+    );
+
+    ////最後にレジスタに保存
+    Register(
+        in=nextPC, load=true, out=pcOut
+    );
+
+    And16(a=pcOut, b=true, out=out);
 }
