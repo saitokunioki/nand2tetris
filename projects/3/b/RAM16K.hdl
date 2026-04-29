@@ -13,5 +13,49 @@ CHIP RAM16K {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    //// addressの上位2ビットを使って4-wayのDMuxを作り、load信号を4個のRAM4Kのうちどれか一つに接続する。
+    DMux4Way(
+        in=load,
+        sel=address[12..13],
+        a=load0,
+        b=load1,
+        c=load2,
+        d=load3
+    );
+
+    //// 4個のRAM4Kを作る。DMux4Wayで出力されたload信号をそれぞれのRAM4Kに接続する。
+    RAM4K(
+        in=in,
+        load=load0,
+        address=address[0..11],
+        out=out0
+    );
+    RAM4K(
+        in=in,
+        load=load1,
+        address=address[0..11],
+        out=out1
+    );
+    RAM4K(
+        in=in,
+        load=load2,
+        address=address[0..11],
+        out=out2
+    );
+    RAM4K(
+        in=in,
+        load=load3,
+        address=address[0..11],
+        out=out3
+    );
+
+    //// 4個のRAM4Kの出力を、addressの上位2ビットを使って4-wayのMuxで選択し、outに接続する。
+    Mux4Way16(
+        a=out0,
+        b=out1,
+        c=out2,
+        d=out3,
+        sel=address[12..13],
+        out=out
+    );
 }
