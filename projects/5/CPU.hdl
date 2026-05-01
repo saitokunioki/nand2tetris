@@ -32,5 +32,82 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-	//// Replace this comment with your code.
+    //// A命令かC命令か判定する
+    Mux16(
+        a=instruction,
+        b=outALU,
+        sel=instruction[15],
+        out=outToAreg
+    );
+
+    //// Aレジスタでの処理（A命令もしくはC命令かつ保存先がAレジスタに指定されている時のみload）
+    Not(in=instruction[15], out=instA);
+    Or(a=instA, b=instruction[5], out=loadA);
+    ARegister(
+        in=outToAreg,
+        load=loadA,
+        out=outAreg,
+        out[0..14]=addressM
+    );
+
+    //// ALUのy入力にAを使うかMを使うか
+    Mux16(
+        a=outAreg,
+        b=inM,
+        sel=instruction[12],
+        out=outToALU
+    );
+
+    //// Dレジスタでの処理（C命令のときのみ書き込み）
+    And(a=instruction[15], b=instruction[4], out=loadD);
+    DRegister(
+        in=outALU,
+        load=loadD,
+        out=outDreg
+    );
+
+    //// ALUでの処理
+    ALU(
+        x=outDreg,
+        y=outToALU,
+        zx=instruction[11],
+        nx=instruction[10],
+        zy=instruction[9],
+        ny=instruction[8],
+        f=instruction[7],
+        no=instruction[6],
+        out=outALU,
+        zr=zr,
+        ng=ng
+    );
+
+    //// outMとwriteMの出力を行う
+    And16(a=outALU, b=true, out=outM);
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    //// 以下、PCカウンタを作成する
+    //// 前提条件と作成
+    Or(a=zr, b=ng, out=zrOrNg);
+    Not(in=zrOrNg, out=isPositive);
+
+    //// jump するかどうか
+    And(a=instruction[2], b=ng, out=cond1);
+    And(a=instruction[1], b=zr, out=cond2);
+    And(a=instruction[0], b=isPositive, out=cond3);
+    Or(a=cond1, b=cond2, out=temp);
+    Or(a=temp, b=cond3, out=jumpCond);
+    And(a=jumpCond, b=instruction[15], out=jump);
+
+    //// increment（jumpが0のとき）
+    Not(in=jump, out=increment);
+
+    //// がっちゃんこする
+    PC(
+        in=outAreg,
+        load=jump, 
+        inc=increment,
+        reset=reset,
+        out=outPC,
+        out[0..14]=pc
+    );
 }
