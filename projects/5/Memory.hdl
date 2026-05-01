@@ -25,5 +25,56 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-	//// Replace this comment with your code.
+    // loadを RAM側 と I/O側 に分ける
+    DMux(
+        in=load,
+        sel=address[14],
+        a=loadRAM,
+        b=loadIO
+    );
+
+    // I/O側を Screen と Keyboard側 に分ける
+    // ただしKeyboardは書き込み不可なので、実質Screenだけ使う
+    DMux(
+        in=loadIO,
+        sel=address[13],
+        a=loadScreen,
+        b=ignoreKeyboardLoad
+    );
+
+    RAM16K(
+        in=in,
+        load=loadRAM,
+        address=address[0..13],
+        out=outRAM
+    );
+
+    Screen(
+        in=in,
+        load=loadScreen,
+        address=address[0..12],
+        out=outScreen
+    );
+
+    Keyboard(
+        out=outKeyboard
+    );
+
+    // 読み出し：RAM or Screen
+    Mux16(
+        a=outRAM,
+        b=outScreen,
+        sel=address[14],
+        out=outRamOrScreen
+    );
+
+    // address[14]=1 かつ address[13]=1 なら Keyboard
+    And(a=address[14], b=address[13], out=isKeyboard);
+    Mux16(
+    a=outRamOrScreen,
+    b=outKeyboard,
+    sel=isKeyboard,
+    out=out
+    );
+
 }
