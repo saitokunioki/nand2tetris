@@ -118,7 +118,7 @@ def main():
     lines = asm_path.read_text(encoding="utf-8").splitlines()
     binary_lines = assemble_basic(lines)
 
-    hack_path.write_text("\n".join(binary_lines) + "\n", encoding="utf-8")
+    hack_path.write_text("\n".join(binary_lines), encoding="utf-8")
 
 # このファイルが直接実行されたときだけ、main() を動かす
 if __name__ == "__main__":
