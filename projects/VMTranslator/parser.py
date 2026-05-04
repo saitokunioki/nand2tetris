@@ -27,7 +27,7 @@ class Parser:
     def __init__(self, input_file):
         '''入力ファイル/ストリームを開き、パースを行う準備をする。'''
         
-        with open(input_file, "r") as file:
+        with open(input_file, "r", encoding="UTF-8") as file:
             lines = file.readlines()
 
         self.commands = []
