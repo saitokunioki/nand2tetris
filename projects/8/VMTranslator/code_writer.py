@@ -15,10 +15,13 @@ class CodeWriter:
         self.file_name = Path(input_path).stem
         
         self.label_count = 0
+
+        self.writeInit()
     
     def setFileName(self, filename: str):
         '''新しいVMファイルの変換が開始されたことを知らせる（VMTranslatorによって呼び出される）。
         '''
+        self.file_name = Path(filename).stem
 
     def writeArithmetic(self, command: str):
         '''算術論値コマンドのcommandに対応するアセンブリコードを
@@ -288,6 +291,14 @@ class CodeWriter:
             self.file.write("M=0\n")
             self.file.write("@SP\n")
             self.file.write("M=M+1\n")
+
+    def writeInit(self):
+        '''ブートストラップコードを書き出す。'''
+        self.file.write("@256\n")
+        self.file.write("D=A\n")
+        self.file.write("@SP\n")
+        self.file.write("M=D\n")
+        self.writeCall("Sys.init", 0)
 
     def writeCall(self, functionName: str, nArgs: int):
         '''callコマンドを実装するアセンブリコードを書き出す。'''
