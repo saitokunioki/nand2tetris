@@ -107,4 +107,4 @@ class Parser:
             C_FUNCTION,
             C_CALL
             }:
-            return self.current_command.split()[2]
+            return int(self.current_command.split()[2])
