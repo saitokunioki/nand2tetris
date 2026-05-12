@@ -264,12 +264,20 @@ class CodeWriter:
     
     def writeLabel(self, label: str):
         '''labelコマンドを実装するアセンブリコードを書き出す。'''
+        self.file.write(f"({label})\n")
 
     def writeGoto(self, label: str):
         '''gotoコマンドを実装するアセンブリコードを書き出す。'''
+        self.file.write(f"@{label}\n")
+        self.file.write("0;JMP\n")  
     
     def writeIf(self, label: str):
         '''if-gotoコマンドを実装するアセンブリコードを書き出す。'''
+        self.file.write("@SP\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write(f"@{label}\n")
+        self.file.write("D;JNE\n")
 
     def writeFunction(self, functionName: str, nVars: int):
         '''functionコマンドを実装するアセンブリコードを書き出す。'''

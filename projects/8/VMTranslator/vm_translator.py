@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from code_writer import CodeWriter
-from parser import C_ARITHMETIC, C_POP, C_PUSH, Parser
+from parser import CommandType, Parser
 
 
 def output_path_for(input_path):
@@ -21,10 +21,16 @@ def translate(input_file):
             parser.advance()
             command_type = parser.commandType()
 
-            if command_type == C_ARITHMETIC:
+            if command_type == CommandType.ARITHMETIC:
                 code_writer.writeArithmetic(parser.arg1())
-            elif command_type in {C_PUSH, C_POP}:
+            elif command_type in {CommandType.PUSH, CommandType.POP}:
                 code_writer.writePushPop(command_type, parser.arg1(), parser.arg2())
+            elif command_type == CommandType.LABEL:
+                code_writer.writeLabel(parser.arg1())
+            elif command_type == CommandType.GOTO:
+                code_writer.writeGoto(parser.arg1())
+            elif command_type == CommandType.IF:
+                code_writer.writeIf(parser.arg1())
     finally:
         code_writer.close()
 

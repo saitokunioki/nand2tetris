@@ -12,15 +12,27 @@ ARITHMETIC_COMMANDS = [
 ]
 
 # 定数
-C_ARITHMETIC = "C_ARITHMETIC"
-C_PUSH = "C_PUSH"
-C_POP = "C_POP"
-C_LABEL = "C_LABEL"
-C_GOTO = "C_GOTO"
-C_IF = "C_IF"
-C_FUNCTION = "C_FUNCTION"
-C_CALL = "C_CALL"
-C_RETURN = "C_RETURN"
+class CommandType:
+    ARITHMETIC = "C_ARITHMETIC"
+    PUSH = "C_PUSH"
+    POP = "C_POP"
+    LABEL = "C_LABEL"
+    GOTO = "C_GOTO"
+    IF = "C_IF"
+    FUNCTION = "C_FUNCTION"
+    CALL = "C_CALL"
+    RETURN = "C_RETURN"
+
+
+C_ARITHMETIC = CommandType.ARITHMETIC
+C_PUSH = CommandType.PUSH
+C_POP = CommandType.POP
+C_LABEL = CommandType.LABEL
+C_GOTO = CommandType.GOTO
+C_IF = CommandType.IF
+C_FUNCTION = CommandType.FUNCTION
+C_CALL = CommandType.CALL
+C_RETURN = CommandType.RETURN
 
 class Parser:
     '''このモジュールは、1つの.vmファイルの解析を行う。'''
@@ -58,23 +70,23 @@ class Parser:
         command_name = self.current_command.split()[0]
 
         if command_name in ARITHMETIC_COMMANDS:
-            return C_ARITHMETIC
+            return CommandType.ARITHMETIC
         elif command_name == "push":
-            return C_PUSH
+            return CommandType.PUSH
         elif command_name == "pop":
-            return C_POP
+            return CommandType.POP
         elif command_name == "label":
-            return C_LABEL
+            return CommandType.LABEL
         elif command_name == "goto":
-            return C_GOTO
+            return CommandType.GOTO
         elif command_name == "if-goto":
-            return C_IF
+            return CommandType.IF
         elif command_name == "function":
-            return C_FUNCTION
+            return CommandType.FUNCTION
         elif command_name == "call":
-            return C_CALL
+            return CommandType.CALL
         elif command_name == "return":
-            return C_RETURN
+            return CommandType.RETURN
 
     def advance(self):
         '''入力から次のコマンドを読み、それを現在のコマンドとする。
@@ -90,8 +102,8 @@ class Parser:
         C_ARITHMETICの場合、コマンド自体が返される。
         現在のコマンドがC_RETURNの場合、本ルーチンは呼ばないようにする。
         '''
-        if self.commandType() != C_RETURN:
-            if self.commandType() == C_ARITHMETIC:
+        if self.commandType() != CommandType.RETURN:
+            if self.commandType() == CommandType.ARITHMETIC:
                 return self.current_command.split()[0]
             else:
                 return self.current_command.split()[1]
@@ -102,9 +114,9 @@ class Parser:
         本ルーチンを呼ぶようにする。
         '''
         if self.commandType() in {
-            C_PUSH,
-            C_POP,
-            C_FUNCTION,
-            C_CALL
+            CommandType.PUSH,
+            CommandType.POP,
+            CommandType.FUNCTION,
+            CommandType.CALL
             }:
             return int(self.current_command.split()[2])
