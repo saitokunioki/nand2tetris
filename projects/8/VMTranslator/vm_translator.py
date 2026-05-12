@@ -31,6 +31,12 @@ def translate(input_file):
                 code_writer.writeGoto(parser.arg1())
             elif command_type == CommandType.IF:
                 code_writer.writeIf(parser.arg1())
+            elif command_type == CommandType.FUNCTION:
+                code_writer.writeFunction(parser.arg1(), parser.arg2())
+            elif command_type == CommandType.CALL:
+                code_writer.writeCall(parser.arg1(), parser.arg2())
+            elif command_type == CommandType.RETURN:
+                code_writer.writeReturn()
     finally:
         code_writer.close()
 

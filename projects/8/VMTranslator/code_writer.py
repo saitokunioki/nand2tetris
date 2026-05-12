@@ -281,13 +281,132 @@ class CodeWriter:
 
     def writeFunction(self, functionName: str, nVars: int):
         '''functionコマンドを実装するアセンブリコードを書き出す。'''
+        self.file.write(f"({functionName})\n")
+        for _ in range(nVars):
+            self.file.write("@SP\n")
+            self.file.write("A=M\n")
+            self.file.write("M=0\n")
+            self.file.write("@SP\n")
+            self.file.write("M=M+1\n")
 
     def writeCall(self, functionName: str, nArgs: int):
         '''callコマンドを実装するアセンブリコードを書き出す。'''
+        # ラベルを生成する
+        return_label = f"{functionName}$ret.{self.label_count}"
+        self.label_count += 1
+
+        # 戻り先のアドレスをスタックにプッシュする
+        self.file.write(f"@{return_label}\n")
+        self.file.write("D=A\n")
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+        # LCLをスタックにプッシュする
+        self.file.write("@LCL\n")
+        self.file.write("D=M\n")
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+        # ARGをスタックにプッシュする
+        self.file.write("@ARG\n")
+        self.file.write("D=M\n")
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+        # THISをスタックにプッシュする
+        self.file.write("@THIS\n")
+        self.file.write("D=M\n")
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+        # THATをスタックにプッシュする
+        self.file.write("@THAT\n")
+        self.file.write("D=M\n")
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+        # ARGをSP-nArgs-5に設定する
+        self.file.write("@SP\n")
+        self.file.write("D=M\n")
+        self.file.write(f"@{nArgs + 5}\n")
+        self.file.write("D=D-A\n")
+        self.file.write("@ARG\n")
+        self.file.write("M=D\n")
+        # LCLをSPに設定する
+        self.file.write("@SP\n")
+        self.file.write("D=M\n")
+        self.file.write("@LCL\n")
+        self.file.write("M=D\n")
+        # ジャンプする
+        self.file.write(f"@{functionName}\n")
+        self.file.write("0;JMP\n")
+        # 戻り先のラベルを書く
+        self.file.write(f"({return_label})\n") 
     
     def writeReturn(self):
         '''returnコマンドを実装するアセンブリコードを書き出す。'''
-    
+        # フレームをR13に保存する
+        self.file.write("@LCL\n")
+        self.file.write("D=M\n")
+        self.file.write("@R13\n")
+        self.file.write("M=D\n")
+        # 戻り先のアドレスをR14に保存する
+        self.file.write("@5\n")
+        self.file.write("A=D-A\n")
+        self.file.write("D=M\n")
+        self.file.write("@R14\n")
+        self.file.write("M=D\n")
+        # 戻り値をARGに配置する
+        self.file.write("@SP\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write("@ARG\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        # SPをARG+1に設定する
+        self.file.write("@ARG\n")
+        self.file.write("D=M+1\n")
+        self.file.write("@SP\n")
+        self.file.write("M=D\n")
+        # THATをフレーム-1に設定する
+        self.file.write("@R13\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write("@THAT\n")
+        self.file.write("M=D\n")
+        # THISをフレーム-2に設定する
+        self.file.write("@R13\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write("@THIS\n")
+        self.file.write("M=D\n")
+        # ARGをフレーム-3に設定する
+        self.file.write("@R13\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write("@ARG\n")
+        self.file.write("M=D\n")
+        # LCLをフレーム-4に設定する
+        self.file.write("@R13\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write("@LCL\n")
+        self.file.write("M=D\n")
+        # R14に保存された戻りのアドレスにジャンプする
+        self.file.write("@R14\n")
+        self.file.write("A=M\n")
+        self.file.write("0;JMP\n")
+
     def close(self):
         '''出力ファイル/ストリームを閉じる'''
         self.file.close()
